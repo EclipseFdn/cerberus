@@ -2,18 +2,23 @@
 
 ## Configuration
 
+statuspage.io.json
 ```json
 {
-  "status_pages": {
-    "statuspage.io": [
-      {
-        "url": "https://api.statuspage.io/v1/",
-        "page_id": "page_id",
-        "token": "oauth_token",
-        "fetch_rate": "PT3M"
-      }
-    ]
-  },
+  "statuspage.io": [
+    {
+      "url": "https://api.statuspage.io/v1/",
+      "page_id": "page_id",
+      "token": "oauth_token",
+      "fetch_rate": "PT3M"
+    }
+  ]
+}
+```
+
+monitors.json
+```json
+{
   "monitors": {
     "http_status": [
       {
@@ -69,11 +74,13 @@
 ## Install from source (CentOS 8+)
 
 ```bash
-sudo dnf install git make
+sudo dnf install git make jq epel-release
+sudo dnf install xmlstarlet
 sudo git clone https://github.com/EclipseFdn/cerberus.git /usr/local/cerberus
 sudo chown -R webmaster:webmaster /usr/local/cerberus
-make relocatable-cerberus
-curl -sSJOL https://github.com/EclipseFdn/status.eclipse.org/raw/master/monitors.json
+export TMPDIR=${TMPDIR:-/tmp}
+make -C /usr/local/cerberus relocatable-cerberus
+curl -sSL -o /usr/local/cerberus/monitors.json https://github.com/EclipseFdn/status.eclipse.org/raw/master/monitors.json
 vim /usr/local/cerberus/statuspage.io.json
 chmod 600 /usr/local/cerberus/statuspage.io.json
 ```
@@ -91,7 +98,7 @@ User=webmaster
 Group=webmaster
 UMask=007
  
-ExecStart=/usr/local/cerberus/target/cerberus/bin/cerberus -c /usr/local/cerberus/monitors.json -s statuspage.io.json
+ExecStart=/usr/local/cerberus/target/cerberus/bin/cerberus -c /usr/local/cerberus/monitors.json -s /usr/local/cerberus/statuspage.io.json
  
 Restart=on-failure
  
@@ -100,6 +107,47 @@ TimeoutStopSec=300
  
 [Install]
 WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl enable cerberus.service
+sudo systemctl start cerberus.service
+sudo journalctl -u cerberus.service -f
+```
+
+/etc/systemd/system/cerberus-restarter.service
+```
+[Unit]
+Description=Cerberus Restarter
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl restart cerberus.service
+
+[Install]
+WantedBy=multi-user.target
+```
+
+/etc/systemd/system/cerberus-restarter.path
+```
+[Path]
+PathModified=/usr/local/cerberus/monitors.json
+PathModified=/usr/local/cerberus/statuspage.io.json
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl enable cerberus-restarter.{path,service}
+sudo systemctl start cerberus-restarter.{path,service}
+sudo crontab -e 
+```
+
+crontab
+```
+*/3 * * * *     . /usr/local/cerberus/download.sh && download_ifmodified https://github.com/EclipseFdn/status.eclipse.org/raw/master/monitors.json /usr/local/cerberus/monitors.json
 ```
 
 ## Building
