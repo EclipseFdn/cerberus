@@ -1,0 +1,5 @@
+{
+  "resources": [
+    {"pattern": ".*version.txt$"}
+  ]
+}

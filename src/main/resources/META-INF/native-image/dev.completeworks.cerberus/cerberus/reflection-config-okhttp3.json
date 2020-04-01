@@ -1,0 +1,10 @@
+[
+  {
+    "name": "sun.security.ssl.TrustManagerFactoryImpl$PKIXFactory",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "java.security.KeyStoreSpi", 
+    "allDeclaredConstructors": true
+  }
+]

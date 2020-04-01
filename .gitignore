@@ -1,0 +1,7 @@
+bin/
+target/
+target_ide/
+.graalvm/
+.adoptopenjdk/
+.mvn/wrapper/maven-wrapper.jar
+/*.json

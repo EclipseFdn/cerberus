@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+# set default options here
+DIR="$(dirname "$(readlink -f "${0}")")"
+QNAME="${project.artifactId}-${project.version}"
+JVM_OPTIONS="${JVM_OPTIONS:--Xquickstart -Xshareclasses:name=${QNAME},cacheDir=${DIR}/../cache_shrc -XX:SharedCacheHardLimit=64m -Xscmx16m}"
+"${DIR}/java" ${JVM_OPTIONS} -cp "${DIR}/../lib/${QNAME}.jar" "${main.class}" ${@}
