@@ -29,9 +29,9 @@ MAVEN_OPTS:=-XshowSettings:vm -XX:+IgnoreUnrecognizedVMOptions -Xquickstart -Xms
 SPOTBUGS_OPTS:=-XshowSettings:vm -XX:+IgnoreUnrecognizedVMOptions -Xquickstart -Xms1g -Xshareclasses:name=spotbugs,cacheDir=$(TMPDIR)/javasharedresources -Xscmx256m -XX:SharedCacheHardLimit=512m
 SPOTBUGS_MAXHEAP:=2048
 
-APP_VERSION:=$(shell xml sel -N mvn="http://maven.apache.org/POM/4.0.0" -t -v  "/mvn:project/mvn:version" pom.xml)
-APP_ARTIFACTID:=$(shell xml sel -N mvn="http://maven.apache.org/POM/4.0.0" -t -v  "/mvn:project/mvn:artifactId" pom.xml)
-APP_SHADED_CLASSIFIER:=$(shell xml sel -N mvn="http://maven.apache.org/POM/4.0.0" -t -v "/mvn:project/mvn:build/mvn:plugins/mvn:plugin[mvn:artifactId/text()='maven-shade-plugin']/mvn:executions/mvn:execution[mvn:phase/text()='package' and mvn:goals/mvn:goal/text()='shade']/mvn:configuration/mvn:shadedClassifierName" pom.xml)
+APP_VERSION:=$(shell xmlstarlet sel -N mvn="http://maven.apache.org/POM/4.0.0" -t -v  "/mvn:project/mvn:version" pom.xml)
+APP_ARTIFACTID:=$(shell xmlstarlet sel -N mvn="http://maven.apache.org/POM/4.0.0" -t -v  "/mvn:project/mvn:artifactId" pom.xml)
+APP_SHADED_CLASSIFIER:=$(shell xmlstarlet sel -N mvn="http://maven.apache.org/POM/4.0.0" -t -v "/mvn:project/mvn:build/mvn:plugins/mvn:plugin[mvn:artifactId/text()='maven-shade-plugin']/mvn:executions/mvn:execution[mvn:phase/text()='package' and mvn:goals/mvn:goal/text()='shade']/mvn:configuration/mvn:shadedClassifierName" pom.xml)
 
 ADOPTOPENJDK_HOME=$(shell ./adoptopenjdk.sh java_home $(ADOPTOPENJDK_RUNTIME_VERSION) $(JVM_IMPL))
 UBERJAR:=target/$(APP_ARTIFACTID)-$(APP_VERSION)-$(APP_SHADED_CLASSIFIER).jar
