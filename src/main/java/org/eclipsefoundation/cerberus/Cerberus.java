@@ -31,13 +31,13 @@ import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.ToJson;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.eclipsefoundation.cerberus.configuration.CerberusConfiguration;
 import org.eclipsefoundation.cerberus.monitors.http.status.HttpStatusMonitor;
 import org.eclipsefoundation.cerberus.statuspage.ComponentUpdater;
 import org.eclipsefoundation.cerberus.statuspage.statuspageio.SPIOComponentUpdater;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import okhttp3.ConnectionPool;
 import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
@@ -136,7 +136,7 @@ public class Cerberus implements Callable<Integer> {
 
     CompletableFuture.anyOf(statusMonitors).exceptionally(e -> { 
       LOGGER.error("Fatal error", e.getCause());
-      return null;
+      throw new RuntimeException(e);
     }).join();
 
     return 0;

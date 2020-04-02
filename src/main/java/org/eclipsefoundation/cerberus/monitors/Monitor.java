@@ -7,14 +7,15 @@
  *******************************************************************************/
 package org.eclipsefoundation.cerberus.monitors;
 
+import java.time.Duration;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipsefoundation.cerberus.configuration.MonitorConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.eclipsefoundation.cerberus.configuration.MonitorConfiguration;
 
 public abstract class Monitor {
  
@@ -40,7 +41,7 @@ public abstract class Monitor {
       } catch (Error error) {
         runFuture.completeExceptionally(error);
       }
-    }, configuration().initialDelay().toMillis(), configuration().period().toMillis(), TimeUnit.MILLISECONDS);
+    }, configuration().initialDelay().toMillis() + new Random().nextInt((int)Duration.ofMinutes(1).toMillis()), configuration().period().toMillis(), TimeUnit.MILLISECONDS);
 
     CompletableFuture<?> detectAnomaliesFuture = new CompletableFuture<>();
     executor.scheduleWithFixedDelay(() -> {
@@ -51,7 +52,7 @@ public abstract class Monitor {
       } catch (Error error) {
         detectAnomaliesFuture.completeExceptionally(error);
       }
-    }, configuration().anomaliesDetection().initialDelay().toMillis(), configuration().anomaliesDetection().period().toMillis(), TimeUnit.MILLISECONDS);
+    }, configuration().anomaliesDetection().initialDelay().toMillis() + new Random().nextInt((int)Duration.ofMinutes(1).toMillis()), configuration().anomaliesDetection().period().toMillis(), TimeUnit.MILLISECONDS);
     LOGGER.info("Scheduled {} for component {}", this.getClass().getSimpleName(), configuration().componentName());
     return CompletableFuture.anyOf(runFuture, detectAnomaliesFuture);
   }
