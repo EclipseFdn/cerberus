@@ -18,13 +18,13 @@ import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.Range;
 import com.google.common.primitives.Ints;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.eclipsefoundation.cerberus.component.Component.Status;
 import org.eclipsefoundation.cerberus.configuration.CerberusConfiguration;
 import org.eclipsefoundation.cerberus.monitors.Monitor;
 import org.eclipsefoundation.cerberus.statuspage.ComponentUpdater;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -95,7 +95,11 @@ public class HttpStatusMonitor extends Monitor {
       lock.writeLock().lockInterruptibly();
       try {
         Report report = Report.create(time, code, exception);
-        LOGGER.debug("{} - {}", configuration.target(), report);
+        if (!statusCodeRange.contains(code)) {
+          LOGGER.warn("{} - {}", configuration.target(), report);
+        } else {
+          LOGGER.debug("{} - {}", configuration.target(), report);
+        }
         datapoints.add(report);
       } finally {
         lock.writeLock().unlock();
@@ -123,7 +127,7 @@ public class HttpStatusMonitor extends Monitor {
     }
 
     Status newStatus = configuration.anomaliesDetection().statusFromAnomaliesCount(anomaliesCount);
-    LOGGER.info("Component {}: {} ({} anomalies in the last {})", configuration.componentName(), newStatus, anomaliesCount, configuration().monitoringHistory());
+    LOGGER.debug("Component {}: {} ({} anomalies in the last {})", configuration.componentName(), newStatus, anomaliesCount, configuration().monitoringHistory());
     updaters.forEach(u -> u.updateStatus(configuration.componentName(), newStatus));
   }
 }
