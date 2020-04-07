@@ -59,8 +59,9 @@ public class HttpStatusMonitor extends Monitor {
     public HttpStatusMonitor createMonitor(CerberusConfiguration.Monitor.HttpStatus configuration, OkHttpClient client, List<ComponentUpdater> updaters) {
       return new HttpStatusMonitor(configuration, client.newBuilder()
         .connectionPool(connectionPool)
-        .callTimeout(configuration.timeout()).build(),
-        updaters);
+        .connectTimeout(configuration.connectTimeout())
+        .readTimeout(configuration.readTimeout())
+        .build(), updaters);
     }
   }
 

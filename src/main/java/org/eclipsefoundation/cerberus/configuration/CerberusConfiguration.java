@@ -101,7 +101,10 @@ public abstract class CerberusConfiguration {
       public abstract Integer statusCodeMax();
 
       @Nullable
-      public abstract Duration timeout();
+      public abstract Duration connectTimeout();
+
+      @Nullable
+      public abstract Duration readTimeout();
 
       @Json(name = "monitoring_history")
       @Nullable
@@ -187,7 +190,8 @@ public abstract class CerberusConfiguration {
         public abstract Builder method(String method);
         public abstract Builder statusCodeMin(Integer statusCodeMin);
         public abstract Builder statusCodeMax(Integer statusCodeMax);
-        public abstract Builder timeout(Duration timeout);
+        public abstract Builder connectTimeout(Duration connectTimeout);
+        public abstract Builder readTimeout(Duration readTimeout);
         public abstract Builder monitoringHistory(Duration monitoringHistory);
         public abstract Builder initialDelay(Duration initialDelay);
         public abstract Builder period(Duration period);
@@ -207,8 +211,10 @@ public abstract class CerberusConfiguration {
           builder.statusCodeMin(statusCodeMin());
         if (statusCodeMax() != null)
           builder.statusCodeMax(statusCodeMax());
-        if (timeout() != null)
-          builder.timeout(timeout());
+        if (connectTimeout() != null)
+          builder.connectTimeout(connectTimeout());
+        if (readTimeout() != null)
+          builder.readTimeout(readTimeout());
         if (monitoringHistory() != null)
           builder.monitoringHistory(monitoringHistory());
         if (initialDelay() != null)
