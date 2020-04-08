@@ -96,7 +96,7 @@ public class Cerberus implements Callable<Integer> {
       }
     }
 
-    ScheduledExecutorService executor = Executors.newScheduledThreadPool(16, threadFactory("Cerberus-Thread-%d"));
+    ScheduledExecutorService executor = Executors.newScheduledThreadPool(64, threadFactory("Cerberus-Thread-%d"));
 
     Dispatcher dispatcher = new Dispatcher(
       new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60, TimeUnit.SECONDS, new SynchronousQueue<>(), threadFactory("HTTPClient-Thread-%d")));
