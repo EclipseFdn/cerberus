@@ -49,7 +49,7 @@ public class HttpStatusMonitor extends Monitor {
   private final List<ComponentUpdater> updaters;
 
   public static class HttpStatusMonitorFactory implements Monitor.Factory {
-    
+
     private final ConnectionPool connectionPool;
 
     public HttpStatusMonitorFactory(ConnectionPool connectionPool) {
@@ -96,7 +96,9 @@ public class HttpStatusMonitor extends Monitor {
       lock.writeLock().lockInterruptibly();
       try {
         Report report = Report.create(time, code, exception);
-        if (!statusCodeRange.contains(code)) {
+        // The HTTP 429 Too Many Requests response status code indicates the user has sent too many requests in a given amount of time ("rate limiting").
+        // consider it a success
+        if (!statusCodeRange.contains(code) && code != 429) {
           LOGGER.warn("{} - {}", configuration.target(), report);
         } else {
           LOGGER.debug("{} - {}", configuration.target(), report);
@@ -119,6 +121,9 @@ public class HttpStatusMonitor extends Monitor {
         anomaliesCount = (int)datapoints.stream()
           .map(Report::statusCode)
           .filter(Predicate.not(statusCodeRange))
+          // The HTTP 429 Too Many Requests response status code indicates the user has sent too many requests in a given amount of time ("rate limiting").
+          // consider it a success
+          .filter(status -> status != 429)
           .count();
       } finally {
         lock.readLock().unlock();
