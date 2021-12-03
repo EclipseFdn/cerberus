@@ -78,7 +78,7 @@ install_ca_bundle() {
   certdata_code="$(download_withcache "https://github.com/mozilla/gecko-dev/raw/master/security/nss/lib/ckfw/builtins/certdata.txt" "${GRAALVM_TARGET}/certdata.txt")"
   local code_keyutil
   code_keyutil="$(download_withcache "https://github.com/use-sparingly/keyutil/releases/download/0.4.0/keyutil-0.4.0.jar" "${GRAALVM_TARGET}/keyutil-0.4.0.jar")"
-  
+
   if [[ "${code_mk_ca_bundle}" -ge "400" ]] || [[ "${certdata_code}" -ge "400" ]] || [[ "${code_keyutil}" -ge "400" ]] ; then
     log_error "there has been error while retrieving certificates data files."
     return 1
@@ -104,7 +104,7 @@ install() {
   if [[ "${code}" -eq "200" ]]; then
     rm -rf "$(graalvm_folder "${versiontag}")" && mkdir -p "$(graalvm_folder "${versiontag}")"
     log_debug "expanding archive %s" "$(graalvm_file "${versiontag}")"
-    expand "$(graalvm_file "${versiontag}")" "$(graalvm_folder "${versiontag}")" 
+    expand "$(graalvm_file "${versiontag}")" "$(graalvm_folder "${versiontag}")"
   elif [[ "${code}" -ge "400" ]]; then
     log_error "Error downloading GraalVM, code = ${code}"
     return 1
@@ -140,7 +140,7 @@ clean() {
 
 graalvm_actualversion() {
   local versiontag="${1:-${GRAALVM_VERSION}}"
-  graalvm_releaseinfo "${versiontag}" | jq -r '.tag_name'
+  graalvm_releaseinfo "${versiontag}" | jq -r '.tag_name' | sed -E 's/vm-(.*)/\1/g'
 }
 
 graalvm_file() {
@@ -164,7 +164,7 @@ graalvm_releaseinfo() {
 
 graalvm_url() {
   local versiontag="${1:-${GRAALVM_VERSION}}"
-  graalvm_releaseinfo "${versiontag}" | jq -r '.assets[] | select(.name | test("graalvm.*'"${GRAALVM_TARGET_JDK}"'.*'"$(platform_regex)"'")) | .browser_download_url'
+  graalvm_releaseinfo "${versiontag}" | jq -r '.assets[] | select(.name | test("graalvm.*'"${GRAALVM_TARGET_JDK}"'.*'"$(platform_regex)"'.*(\\.tar\\.gz|\\.zip)$")) | .browser_download_url'
 }
 
 graalvm_home_suffix() {

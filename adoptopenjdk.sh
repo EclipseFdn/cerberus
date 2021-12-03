@@ -50,19 +50,20 @@ install() {
   local release="${3:-${ADOPTOPENJDK_VERSION}}"
   local type="${4:-${ADOPTOPENJDK_TYPE}}"
   local heap_size="${5:-${ADOPTOPENJDK_HEAP_SIZE}}"
-  
+
   local adoptopenjdk_file
   adoptopenjdk_file="${version}_${vm}-${type}-$(os)_$(arch)-${heap_size}-${release}"
-
   mkdir -p "${ADOPTOPENJDK_TARGET}"
   local code=0
-  code=$(download_withcache "https://api.adoptopenjdk.net/v2/info/releases/${version}?openjdk_impl=${vm}&os=$(os)&arch=$(arch)&release=${release}&type=${type}&heap_size=${heap_size}" "${ADOPTOPENJDK_TARGET}/${adoptopenjdk_file}.json")
+  code=$(download_withcache "https://api.adoptopenjdk.net/v3/assets/feature_releases/${version}/ga?jvm_impl=${vm}&os=$(os)&architecture=$(arch)&image_type=${type}&heap_size=${heap_size}" "${ADOPTOPENJDK_TARGET}/${adoptopenjdk_file}.json")
 
+  # TODO .[2] is a quick hack to get 11.0.11 as there is an issue with more recent versions
+  # https://github.com/ibmruntimes/Semeru-Runtimes/issues/3
   if [[ ${code} -lt 400 ]]; then
     local url
-    url="$(jq -r '.binaries[].binary_link' < "${ADOPTOPENJDK_TARGET}/${adoptopenjdk_file}.json")"
+    url="$(jq -r '.[2].binaries[].package.link' < "${ADOPTOPENJDK_TARGET}/${adoptopenjdk_file}.json")"
     local binary_name
-    binary_name="$(jq -r '.binaries[].binary_name' < "${ADOPTOPENJDK_TARGET}/${adoptopenjdk_file}.json")"
+    binary_name="$(jq -r '.[2].binaries[].package.name' < "${ADOPTOPENJDK_TARGET}/${adoptopenjdk_file}.json")"
     code=$(download_withcache "${url}" "${ADOPTOPENJDK_TARGET}/${binary_name}")
 
     if [[ "${code}" == "200" ]] || [[ ! -d "${ADOPTOPENJDK_TARGET}/${adoptopenjdk_file}" ]]; then

@@ -21,10 +21,10 @@ else
 		osarch = $(shell uname -m | tr A-Z a-z)
 endif
 
-GRAALVM_VERSION:=latest
-ADOPTOPENJDK_RUNTIME_VERSION:=openjdk11
+GRAALVM_VERSION:=vm-21.3.0
+ADOPTOPENJDK_RUNTIME_VERSION:=11
 JVM_IMPL=openj9
-# For debug -XshowSettings:vm -showversion 
+# For debug -XshowSettings:vm -showversion
 MAVEN_OPTS:=-XshowSettings:vm -XX:+IgnoreUnrecognizedVMOptions -Xquickstart -Xms1g -Xmx2g -Xshareclasses:name=mvn,cacheDir=$(TMPDIR)/javasharedresources -Xscmx256m -XX:SharedCacheHardLimit=512m
 SPOTBUGS_OPTS:=-XshowSettings:vm -XX:+IgnoreUnrecognizedVMOptions -Xquickstart -Xms1g -Xshareclasses:name=spotbugs,cacheDir=$(TMPDIR)/javasharedresources -Xscmx256m -XX:SharedCacheHardLimit=512m
 SPOTBUGS_MAXHEAP:=2048
@@ -43,8 +43,10 @@ export JAVA_HOME=$(ADOPTOPENJDK_HOME)
 
 .PHONY: uberjar relocatable-$(APP_ARTIFACTID) native-$(APP_ARTIFACTID) clean deepclean display-updates
 
-$(UBERJAR): $(SRC) pom.xml $(wildcard launchers/*)
+$(ADOPTOPENJDK_HOME):
 	./adoptopenjdk.sh install $(ADOPTOPENJDK_RUNTIME_VERSION) $(JVM_IMPL)
+
+$(UBERJAR): $(SRC) pom.xml $(wildcard launchers/*) $(ADOPTOPENJDK_HOME)
 	./mvnw verify -Dspotbugs.maxHeap="$(SPOTBUGS_MAXHEAP)" -Dspotbugs.jvmArgs="$(SPOTBUGS_OPTS)"
 
 uberjar: $(UBERJAR)
@@ -64,17 +66,17 @@ relocatable-$(APP_ARTIFACTID): target/$(APP_ARTIFACTID)
 
 target/$(NATIVE_BIN): $(SRC) pom.xml
 	./graalvm.sh install $(GRAALVM_VERSION)
-	export JAVA_HOME="$$(./graalvm.sh graalvm_home)" && ./mvnw verify -Pnative -Dspotbugs.maxHeap="$(SPOTBUGS_MAXHEAP)" -Dspotbugs.jvmArgs="$(SPOTBUGS_OPTS)" -Dnative.filename=$(NATIVE_BIN)
+	export JAVA_HOME="$$(./graalvm.sh graalvm_home $(GRAALVM_VERSION))" && ./mvnw verify -Pnative -Dspotbugs.maxHeap="$(SPOTBUGS_MAXHEAP)" -Dspotbugs.jvmArgs="$(SPOTBUGS_OPTS)" -Dnative.filename=$(NATIVE_BIN)
 
 native-$(APP_ARTIFACTID): target/$(NATIVE_BIN)
 
-display-updates: 
+display-updates:
 	./mvnw org.codehaus.mojo:versions-maven-plugin:display-plugin-updates
 	./mvnw org.codehaus.mojo:versions-maven-plugin:display-dependency-updates
 
 clean:
 	find . -name .DS_Store -delete
-	./adoptopenjdk.sh install $(ADOPTOPENJDK_RUNTIME_VERSION) $(JVM_IMPL)
+#	./adoptopenjdk.sh install $(ADOPTOPENJDK_RUNTIME_VERSION) $(JVM_IMPL)
 	./mvnw clean
 
 deepclean: clean
