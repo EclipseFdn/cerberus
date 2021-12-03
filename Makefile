@@ -74,9 +74,8 @@ display-updates:
 	./mvnw org.codehaus.mojo:versions-maven-plugin:display-plugin-updates
 	./mvnw org.codehaus.mojo:versions-maven-plugin:display-dependency-updates
 
-clean:
+clean: $(ADOPTOPENJDK_HOME)
 	find . -name .DS_Store -delete
-#	./adoptopenjdk.sh install $(ADOPTOPENJDK_RUNTIME_VERSION) $(JVM_IMPL)
 	./mvnw clean
 
 deepclean: clean
